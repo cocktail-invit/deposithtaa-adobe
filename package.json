@@ -1,12 +1,8 @@
 {
-  "name": "cocktail-invite",
+  "name": "adobe-trap",
   "version": "1.0.0",
-  "description": "Exclusive Event Invitation",
   "main": "server.js",
   "dependencies": {
     "express": "^4.18.2"
-  },
-  "scripts": {
-    "start": "node server.js"
   }
 }
